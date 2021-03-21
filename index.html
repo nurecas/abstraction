@@ -1,0 +1,104 @@
+<html>
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.3.0/lib/p5.min.js"></script>
+</head>
+
+<body>
+    <script>
+        var xoff = 0,
+            yoff = 0,
+            noiseScale = 0.0007,
+            prevNV = 0,
+            prevNV2 = 0,
+            pNV = 0,
+            pNV2 = 0,
+            c, b, startH = 15,
+            range = 55,
+            endH = 0,
+            count = 0,
+            dir = 1;
+
+        //Initialize
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+            prevNV = width / 2;
+            prevNV2 = height / 2;
+            pNV = width / 2;
+            pNV2 = height / 2;
+            colorMode(HSB, 255);
+            background(40, 10, 255);
+            startH=random(0,215);
+//            startH = parseInt(window.context.owner) % 215;
+            c = color(255, 255, 255);
+            b = color(255, 255, 255);
+            if (width > 1200)
+                noiseScale = 0.0004;
+            else if (width < 500)
+                noiseScale = 0.003;
+            endH = startH + range;
+            count = startH;
+            stroke(40, 10, 240);
+            strokeWeight(1);
+            for (var x = 0; x < width; x += 10) {
+                for (var y = 0; y < height; y += 10) {
+                    ellipse(x + random(-10, 10), y + random(-10, 10), 1, 1);
+                }
+            }
+        }
+
+        function draw() {
+            background(40, 10, 255, 0.5);
+            //Setting the colours
+            if (count < startH)
+                dir = +1;
+            if (count > endH)
+                dir = -1;
+            count += dir * 0.2;
+            c = color(count, (1 - pNV) * 255 + 100, 255);
+            b = color(255 - count, (pNV) * 255 + 100, 255);
+
+            //Perlin noise to create the motion
+            xoff += 0.01;
+            for (var x = 0; x < width; x += 5) {
+                yoff += 0.01;
+                var noiseVal = noise((xoff + x) * noiseScale, yoff * noiseScale);
+                var noiseVal2 = noise(yoff * noiseScale, (xoff + x) * noiseScale);
+                if (x > 0) {
+                    strokeWeight(5);
+                    stroke(b);
+                    line(width * noiseVal2, height * noiseVal, width * pNV2, height * pNV);
+                    line(width - width * noiseVal2, height - height * noiseVal, width - width * pNV2, height - height * pNV);
+                } else {
+                    strokeWeight(1);
+                    stroke(c);
+                    line(width - width * noiseVal2, height * noiseVal, width - width * prevNV2, height * prevNV);
+                    line(width * noiseVal2, height - height * noiseVal, width * prevNV2, height - height * prevNV);
+                    prevNV = noiseVal;
+                    prevNV2 = noiseVal2;
+                }
+                pNV = noiseVal;
+                pNV2 = noiseVal2;
+            }
+
+            //Frame
+            noFill();
+            strokeWeight(50);
+            stroke(startH, 100, 80);
+            rect(0, 0, width, height);
+            strokeWeight(40);
+            stroke(startH, 80, 30);
+            rect(0, 0, width, height);
+        }
+
+        //Save on pressing "s"
+        function keyTyped() {
+            if (key === 's') {
+                saveCanvas('Abstraction', 'png');
+            }
+        }
+
+    </script>
+</body>
+
+</html>
